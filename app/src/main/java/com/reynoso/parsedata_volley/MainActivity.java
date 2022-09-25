@@ -26,7 +26,6 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding mainBinding;
-    private RequestQueue queue;
     private String url ="https://google.com";
     private String API ="https://jsonplaceholder.typicode.com/users/";
     private String API_SINGLE_OBJECT = "https://jsonplaceholder.typicode.com/users/1";
@@ -34,10 +33,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mainBinding = DataBindingUtil.setContentView(MainActivity.this,R.layout.activity_main);
-        queue = Volley.newRequestQueue(MainActivity.this);
-        queue.add(googleStringRequest());
-        queue.add(getJsonArrayRequest());
-        queue.add(getJsonObjectRequest());
+        //Creates an instance of mySingleton class, as well as a RequestQueue instance only passing as an argument the context.
+        MySingleton mySingleton = MySingleton.getInstance(MainActivity.this);
+        mySingleton.addToRequestQueue(getJsonArrayRequest());
+        mySingleton.addToRequestQueue(getJsonObjectRequest());
+        mySingleton.addToRequestQueue(googleStringRequest());
     }
 
     @NonNull
