@@ -18,6 +18,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -30,10 +31,28 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         googleStringRequest();
+        JsonArrayRequest jsonArrayRequest = getJsonArrayRequest();
+        queue.add(googleStringRequest());
+        queue.add(jsonArrayRequest);
+    }
+
+    @NonNull
+    private JsonArrayRequest getJsonArrayRequest() {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, API, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                Log.d(TAG, "onResponse() returned: " + response);
+                //response.length returns the number of objects stored
+                for(int i=0;i<response.length();i++){
+                    try {
+                        //iterate through the jsonArray
+                        JSONObject jsonObject = response.getJSONObject(i);
+                        //on the object use the proper method type to get a value with its key
+                        Log.d(TAG, "onResponse() returned: " + jsonObject.getString("name"));
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -41,8 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "onErrorResponse: ",error );
             }
         });
-        queue.add(googleStringRequest());
-        queue.add(jsonArrayRequest);
+        return jsonArrayRequest;
     }
 
     @NonNull
