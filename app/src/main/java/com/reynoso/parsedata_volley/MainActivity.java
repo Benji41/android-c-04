@@ -4,6 +4,7 @@ import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +17,7 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.reynoso.parsedata_volley.databinding.ActivityMainBinding;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,17 +25,37 @@ import org.json.JSONObject;
 
 
 public class MainActivity extends AppCompatActivity {
+    private ActivityMainBinding mainBinding;
     private RequestQueue queue;
     private String url ="https://google.com";
-    private  String API ="https://jsonplaceholder.typicode.com/users/";
+    private String API ="https://jsonplaceholder.typicode.com/users/";
+    private String API_SINGLE_OBJECT = "https://jsonplaceholder.typicode.com/users/1";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        googleStringRequest();
-        JsonArrayRequest jsonArrayRequest = getJsonArrayRequest();
+        mainBinding = DataBindingUtil.setContentView(MainActivity.this,R.layout.activity_main);
+        queue = Volley.newRequestQueue(MainActivity.this);
         queue.add(googleStringRequest());
-        queue.add(jsonArrayRequest);
+        queue.add(getJsonArrayRequest());
+        queue.add(getJsonObjectRequest());
+    }
+
+    @NonNull
+    private JsonObjectRequest getJsonObjectRequest() {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                Request.Method.GET, API_SINGLE_OBJECT, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d(TAG, "onResponse() returned: " + response);
+                mainBinding.textViewGreeting.setText(response.toString());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "onErrorResponse: ", error.fillInStackTrace());
+            }
+        });
+        return jsonObjectRequest;
     }
 
     @NonNull
@@ -65,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
     @NonNull
     private StringRequest googleStringRequest() {
-        queue = Volley.newRequestQueue(MainActivity.this);
+
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
